@@ -11,7 +11,7 @@
       <button type="submit" class="button">Cancel</button>
     </form> |
     {%if dev %}
-    <form mehtod="post" action="{% url paymentapi.views.process_payment 'error' payment.id %}">
+    <form method="post" action="{% url paymentapi.views.process_payment 'error' payment.id %}">
       {% csrf_token %}
       <button type="submit" class="button">Fail</button>
     </form> |
