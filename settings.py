@@ -105,3 +105,8 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'paymentapi',
 )
+
+try:
+    from local_settings import *
+except ImportError:
+    pass
