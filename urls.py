@@ -4,7 +4,7 @@ from django.views.generic.simple import direct_to_template
 urlpatterns = patterns('',
     (r'^', include('paymentapi.urls')), # import urls from paymentapi app
     (r'^test/', 'paymentapi.views.test'),
-    (r'^$', direct_to_template, {'template': 'payment/index.html'}),
+    (r'^$', 'paymentapi.views.index'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),

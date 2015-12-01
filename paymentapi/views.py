@@ -2,11 +2,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.context_processors import csrf
+from django.core.urlresolvers import reverse
 from django.template import RequestContext
 
 from models import Payment
 from forms import SecretKeyForm, PaymentForm
 from utils import get_secret_key, check_md5, md5hex
+
+def index(request):
+    return render_to_response('payment/index.html', {
+        'pay_url': request.build_absolute_uri(reverse('paymentapi.views.pay'))
+    }, context_instance=RequestContext(request))
 
 def secret_key(request):
   """
@@ -20,14 +26,14 @@ def secret_key(request):
     if form.is_valid():
       sid = form.cleaned_data['sid']
       key = get_secret_key(sid)
-      return render_to_response('payment/key_created.html', {'sid': sid, 'key': key}, 
+      return render_to_response('payment/key_created.html', {'sid': sid, 'key': key},
                 context_instance=RequestContext(request))
 
   context = {'form': form}
   context.update(csrf(request))
-  return render_to_response('payment/key.html', context, 
+  return render_to_response('payment/key.html', context,
             context_instance=RequestContext(request))
-  
+
 @csrf_exempt
 def pay(request):
   """
@@ -46,11 +52,11 @@ def pay(request):
   if payment_form.is_valid():
     payment = payment_form.save()
     dev = True if 'dev' in request.POST else False
-    return render_to_response('payment/pay.html', {'payment': payment, 'dev': dev}, 
+    return render_to_response('payment/pay.html', {'payment': payment, 'dev': dev},
               context_instance=RequestContext(request))
   else:
     return HttpResponse("Invalid or missing data POSTed", status=400)
-  
+
 def process_payment(request, ptype, payment_id):
   """
   Processes the payment after user confirmation. Parameter ptype can be one of success,
@@ -64,7 +70,7 @@ def process_payment(request, ptype, payment_id):
   # pass the checksum along in the redirect for the seller
   url = "%s&pid=%s&ref=%s&checksum=%s"%(url, payment.pid, payment.id, checksum)
   return HttpResponseRedirect(url)
-  
+
 def test(request):
   """
   Allows for testing the service without actually calling it from code. Aids in testing in
@@ -77,5 +83,5 @@ def test(request):
   from utils import md5hex
   payment['checksum'] = md5hex(checkstr)
   form = PaymentForm(payment)
-  return render_to_response('payment/test.html', {'form': form}, 
+  return render_to_response('payment/test.html', {'form': form},
             context_instance=RequestContext(request))

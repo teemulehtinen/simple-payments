@@ -10,7 +10,8 @@
     make sure to select one only your group would think.</p>
 
 <h3>Step 2: Make a payment request</h3>
-<p>Payment requests are made through HTTP POST requests to URL (make sure you include the / at the end): <code>http://REPLACE WITH YOUR URL{%url paymentapi.views.pay %}</code></p>
+<p>Payment requests are made through HTTP POST requests to URL (make sure you include the / at the end):
+  <code>{{ pay_url }}</code></p>
 <p>The request should have the following parameters:</p>
 <table>
     <thead>
@@ -31,28 +32,28 @@
 <p>The checksum is calculated from pid, sid, amount, and your secret key. The string is formed like this:</p>
 <pre>"pid=%s&amp;sid=%s&amp;amount=%s&amp;token=%s"%(pid, sid, amount, secret_key)</pre>
 <p>The checksum is then the MD5-hash of the above string. In Python:</p>
-<pre>import md5
+<pre>from hashlib import md5
 # checksumstr is the string concatenated above
-m = md5.new(checksumstr)
+m = md5(checksumstr.encode("ascii"))
 checksum = m.hexdigest()
 # checksum is the value that should be used in the payment request</pre>
 
 <h4>Example Form</h4>
 <p>For example, the form rendered on your site can look like the following:</p>
 <pre>
-&lt;form action="http://REPLACE WITH YOUR URL{% url paymentapi.views.pay %}" method="POST">
+&lt;form action="{{ pay_url }}" method="POST">
     &lt;input type="hidden" name="pid" value="payment1" />
     &lt;input type="hidden" name="sid" value="groupBest" />
-    &lt;input type="hidden" name="success_url" 
+    &lt;input type="hidden" name="success_url"
             value="http://localhost:8000/payment/success" />
-    &lt;input type="hidden" name="cancel_url" 
+    &lt;input type="hidden" name="cancel_url"
             value="http://localhost:8000/payment/cancel" />
-    &lt;input type="hidden" name="error_url" 
+    &lt;input type="hidden" name="error_url"
             value="http://localhost:8000/payment/error" />
-    &lt;input type="hidden" name="checksum" 
+    &lt;input type="hidden" name="checksum"
             value="ee306a1dec60d40534391106f7855434" />
 
-    &lt;label for="id_amount">Amount&lt;/label> 
+    &lt;label for="id_amount">Amount&lt;/label>
     &lt;input type="text" id="id_amount" name="amount" value="5" />
     &lt;input type="submit" value="Accept Payment"/>
 &lt;/form>
