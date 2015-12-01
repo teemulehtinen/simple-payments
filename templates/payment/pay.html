@@ -5,9 +5,20 @@
 <p>You are about to pay <span class="sum">{{payment.amount}}</span>&euro; for seller <span class="seller">{{payment.sid}}</span>.
 </p>
 
-<div>
-    <a class="button" href="/cancel/{{payment.id}}/">Cancel</a> | 
-    {%if dev %}<a class="button" href="{% url paymentapi.views.process_payment 'error' payment.id %}">Fail</a> |{% endif %}
-    <a class="button" href="{% url paymentapi.views.process_payment 'success' payment.id %}">Pay</a>
+<div class="inline">
+    <form method="post" action="{% url paymentapi.views.process_payment 'cancel' payment.id %}">
+      {% csrf_token %}
+      <button type="submit" class="button">Cancel</button>
+    </form> |
+    {%if dev %}
+    <form mehtod="post" action="{% url paymentapi.views.process_payment 'error' payment.id %}">
+      {% csrf_token %}
+      <button type="submit" class="button">Fail</button>
+    </form> |
+    {% endif %}
+    <form method="post" action="{% url paymentapi.views.process_payment 'success' payment.id %}">
+      {% csrf_token %}
+      <button type="submit" class="button">Pay</button>
+    </form>
 </div>
 {% endblock %}

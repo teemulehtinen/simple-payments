@@ -62,13 +62,17 @@ def process_payment(request, ptype, payment_id):
   Processes the payment after user confirmation. Parameter ptype can be one of success,
   cancel, and error. The user will be redirected to the correct URL depending on the ptype.
   """
+  if request.method != 'POST':
+      return HttpResponse("%s Not Allowed"%request.method, status=405)
   payment = get_object_or_404(Payment, pk=payment_id)
   url = getattr(payment, '%s_url'%ptype)
   if url.find("?") == -1:
     url += "?"
-  checksum = md5hex("pid=%s&ref=%s&token=%s"%(payment.pid, payment.id, get_secret_key(payment.sid)))
+  checksum = md5hex("pid=%s&ref=%s&result=%s&token=%s"%(
+    payment.pid, payment.id, ptype, get_secret_key(payment.sid)))
   # pass the checksum along in the redirect for the seller
-  url = "%s&pid=%s&ref=%s&checksum=%s"%(url, payment.pid, payment.id, checksum)
+  url = "%s&pid=%s&ref=%s&result=%s&checksum=%s"%(
+    url, payment.pid, payment.id, ptype, checksum)
   return HttpResponseRedirect(url)
 
 def test(request):
@@ -76,8 +80,8 @@ def test(request):
   Allows for testing the service without actually calling it from code. Aids in testing in
   understanding the parameters as well as testing the success, error, and cancel urls.
   """
-  payment = {'pid':'mytestsale','sid':'tester', 'amount':15, 'success_url': 'http://localhost:8000/success',
-            'error_url': 'http://localhost:8000/error','cancel_url': 'http://localhost:8000/cancel'}
+  payment = {'pid':'mytestsale','sid':'tester', 'amount':15, 'success_url': 'http://localhost:8000/shop/success',
+            'error_url': 'http://localhost:8000/shop/error','cancel_url': 'http://localhost:8000/shop/cancel'}
   token = get_secret_key(payment['sid'])
   checkstr = "pid=%s&sid=%s&amount=%s&token=%s"%(payment['pid'], payment['sid'], payment['amount'], token)
   from utils import md5hex
